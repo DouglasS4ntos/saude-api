@@ -1,15 +1,20 @@
 from django.shortcuts import render
-
-# Create your views here.
 from rest_framework import viewsets, filters
 from .models import Professional, Appointment
 from .serializers import ProfessionalSerializer, AppointmentSerializer
+import logging
+
+logger = logging.getLogger(__name__)
 
 class ProfessionalViewSet(viewsets.ModelViewSet):
     queryset = Professional.objects.all().order_by('-created_at')
     serializer_class = ProfessionalSerializer
     filter_backends = [filters.SearchFilter]
     search_fields = ['full_name', 'occupation']
+
+    def perform_create(self, serializer):
+        instance = serializer.save()
+        logger.info(f" [AUDITORIA] Profissional cadastrado: {instance.full_name} (ID: {instance.id}) pelo usuário {self.request.user}")
 
 class AppointmentViewSet(viewsets.ModelViewSet):
     queryset = Appointment.objects.all().order_by('date')
@@ -21,3 +26,7 @@ class AppointmentViewSet(viewsets.ModelViewSet):
         if professional_id:
             queryset = queryset.filter(professional_id=professional_id)
         return queryset
+
+    def perform_create(self, serializer):
+        instance = serializer.save()
+        logger.info(f" [AUDITORIA] Nova consulta agendada para o Profissional ID: {instance.professional.id}")

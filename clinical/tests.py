@@ -3,16 +3,23 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 from .models import Professional, Appointment
+from django.contrib.auth.models import User
+from rest_framework.authtoken.models import Token
 
 class ClinicalAPITests(APITestCase):
 
     def setUp(self):
+        self.user = User.objects.create_user(username='testuser', password='password123')
+        self.token = Token.objects.create(user=self.user)
+        self.client.credentials(HTTP_AUTHORIZATION=f'Token {self.token.key}')
+
         self.professional = Professional.objects.create(
             full_name="Dr. Teste Lacrei",
             occupation="Psicologia",
             address="Rua da Inclusão, 500",
             contact="teste@lacrei.com"
         )
+
         self.list_url = reverse('professional-list')
         self.appointment_url = reverse('appointment-list')
 
