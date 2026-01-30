@@ -97,13 +97,16 @@ CORS_ALLOW_ALL_ORIGINS = True
     }
 }"""
 
+
+env_db_url = os.getenv('DATABASE_URL')
 DATABASES = {
     'default': dj_database_url.config(
-        default=DATABASE_URL,
+        default=env_db_url,
         conn_max_age=600,
         conn_health_checks=True,
     )
 }
+
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
